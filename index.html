@@ -33,7 +33,7 @@
 
   /* ===== Pantallas ===== */
   .screen{ position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
-    padding:1rem; overflow-y:auto; background:
+    padding:3.8rem 1rem 1rem; overflow-y:auto; background:
       radial-gradient(ellipse at 50% -10%, rgba(141,8,1,.28), transparent 60%),
       linear-gradient(180deg,#0a0808 0%, #060505 100%); }
   .hidden{ display:none !important; }
@@ -58,15 +58,32 @@
   .btn.primary:hover{ background:#a50d04; }
   .btn:disabled{ opacity:.45; cursor:not-allowed; }
   .btn.small{ width:auto; display:inline-block; padding:.5rem .9rem; font-size:1rem; margin-top:0; }
-  /* Botón de regreso a la Sala de Juegos: esquina superior de cada
-     menú, borde sangre sobre fondo oscuro, bien grande para tocarlo
-     en Android. Navega en la misma ventana (sin target=_blank). */
-  .btn-sala{ display:block; width:100%; margin:0 0 1rem; padding:.85rem 1rem; min-height:3.4rem;
+  /* Botón de regreso a la Sala de Juegos: FIJO en la esquina
+     superior derecha, por encima de todas las pantallas (menú,
+     sala de espera, partida/HUD, pausa y fin), siempre visible.
+     Es un único botón global fuera de las pantallas. Navega en la
+     misma ventana (sin target=_blank). */
+  .btn-sala{ position:fixed; top:calc(env(safe-area-inset-top,0px) + .55rem); right:.6rem; z-index:10000;
+    display:inline-flex; align-items:center; justify-content:center; width:auto; margin:0;
+    padding:.6rem .95rem; min-height:2.75rem;
     background:#1a0505; border:1px solid var(--blood); color:#ffd9d9; font-weight:700;
-    font-size:1.15rem; letter-spacing:.05em; text-align:center; box-shadow:inset 0 0 0 2px #000; }
+    font-size:1.02rem; letter-spacing:.04em; text-align:center;
+    box-shadow:0 4px 18px rgba(0,0,0,.75), inset 0 0 0 2px #000; }
   .btn-sala:hover,.btn-sala:active{ background:var(--blood-dark); color:#fff; }
-  #confirm-abandon .btn-sala{ margin:.7rem 0 0; }
-  @media (pointer:coarse){ .btn-sala{ min-height:4rem; font-size:1.25rem; padding:1rem; } }
+  @media (pointer:coarse){ .btn-sala{ min-height:3.2rem; font-size:1.12rem; padding:.7rem 1.1rem; } }
+  /* Sala de espera: estado de espera, caducidad y copiar código */
+  .lobby-wait{ text-align:center; font-weight:700; font-size:1.12rem; color:var(--warn);
+    margin:.7rem 0 0; letter-spacing:.03em; }
+  .lobby-expire{ text-align:center; font-weight:600; font-size:.98rem; color:var(--dim); margin:.35rem 0 0; }
+  #btn-copy-code{ margin-top:.2rem; }
+  /* Confirmación al salir de la sala en mitad de una partida */
+  #confirm-leave{ position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+    background:rgba(0,0,0,.74); z-index:60; padding:1rem; }
+  #confirm-leave .cab-card{ background:var(--panel); border:1px solid var(--blood);
+    box-shadow:0 0 0 4px #000, 0 24px 60px rgba(0,0,0,.8); padding:1.2rem; max-width:420px; width:100%; text-align:center; }
+  #confirm-leave .cab-txt{ font-weight:700; font-size:1.2rem; margin:.2rem 0 1rem; line-height:1.4; }
+  @media (pointer:coarse){ #confirm-leave .cab-txt{ font-size:1.35rem; }
+    #confirm-leave .btn{ min-height:3.6rem; font-size:1.2rem; } }
   .row2{ display:flex; gap:.6rem; } .row2 > *{ flex:1; }
   .seg{ display:flex; border:1px solid var(--line); }
   .seg button{ flex:1; background:#0a0908; color:var(--dim); border:0; font-weight:700; font-size:1.02rem; padding:.7rem .3rem; line-height:1.25; }
@@ -95,7 +112,7 @@
   #hud-top{ position:absolute; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:flex-start; padding:.6rem .7rem; gap:.6rem; }
   #gens-box{ background:rgba(8,6,6,.72); border:1px solid var(--line); padding:.45rem .7rem; font-weight:700; font-size:1.05rem; letter-spacing:.04em; }
   #gens-box .n{ color:var(--warn); font-family:'Press Start 2P',monospace; font-size:.95rem; }
-  #pstatus{ display:flex; flex-direction:column; gap:.3rem; align-items:flex-end; }
+  #pstatus{ display:flex; flex-direction:column; gap:.3rem; align-items:flex-end; margin-top:3.4rem; }
   .pstat{ background:rgba(8,6,6,.72); border:1px solid var(--line); padding:.28rem .6rem; font-weight:700; font-size:.95rem; display:flex; gap:.5rem; align-items:center; }
   .pstat .st{ font-size:.78rem; letter-spacing:.06em; text-transform:uppercase; }
   .st.ok{ color:var(--ok);} .st.hurt{ color:var(--warn);} .st.bad{ color:var(--blood);} .st.out{ color:var(--dim);}
@@ -178,13 +195,16 @@
   .endtitle{ font-family:'Press Start 2P',monospace; text-align:center; font-size:clamp(1rem,5vw,1.5rem); line-height:1.5; margin:.4rem 0; }
   @media (max-width:560px){ .card{ padding:1.1rem; } #heart{ bottom:auto; top:7.5rem; }
     #hookalert{ top:9.9rem; font-size:.92rem; }
-    #gens-box{ font-size:.92rem; padding:.35rem .5rem; }
+    #gens-box{ font-size:.92rem; padding:.35rem .5rem; max-width:10.6rem; }
     #objective{ top:7.4rem; font-size:.92rem; }
     .pstat{ font-size:.85rem; padding:.22rem .45rem; } }
   @media (pointer:coarse){ #feed{ bottom:10.5rem; } #heart{ bottom:auto; top:8.6rem; } }
 </style>
 </head>
 <body>
+
+<!-- Botón global FIJO a la Sala de Juegos: visible en todas las pantallas -->
+<button class="btn-sala" type="button" data-sala aria-label="Volver a la Sala de Juegos">← Sala de Juegos</button>
 
 <canvas id="game" width="480" height="270"></canvas>
 <div id="vignette"></div>
@@ -201,7 +221,6 @@
   <div id="confirm-abandon"><div class="cab-card">
     <p class="cab-txt">¿Seguro que quieres abandonar la partida?</p>
     <div class="row2"><button class="btn" id="btn-abandon-no" type="button">No</button><button class="btn primary" id="btn-abandon-yes" type="button">Sí, abandonar</button></div>
-    <button class="btn-sala" type="button" data-sala>← Sala de Juegos</button>
   </div></div>
   <div id="objective"></div>
   <div id="hookalert"></div>
@@ -229,7 +248,6 @@
 <!-- MENÚ PRINCIPAL -->
 <section class="screen" id="scr-menu">
   <div class="card">
-    <button class="btn-sala" type="button" data-sala>← Sala de Juegos</button>
     <h1 class="title">PESADILLA<br /><span class="red">RETRO</span></h1>
     <p class="subtitle">Terror asimétrico · Estilo Doom clásico</p>
     <p class="tagline">Repara los generadores y escapa… si el asesino te deja. Para 3 jugadores en línea con código de sala, o practica en solitario contra la IA.</p>
@@ -286,19 +304,25 @@
     <h2 class="px" style="text-align:center;font-size:1rem;margin:.2rem 0 .4rem">SALA DE ESPERA</h2>
     <p class="subtitle" id="lobby-mode" style="margin-bottom:.4rem">—</p>
     <div class="code-big" id="lobby-code">····</div>
-    <p class="tagline" style="margin:0">Comparte este código con tus 2 amigos para que se unan.</p>
+    <button class="btn" id="btn-copy-code" type="button">📋 Copiar código</button>
+    <p class="tagline" style="margin:.6rem 0 0">Comparte este código con tus 2 amigos para que se unan.</p>
+    <p class="lobby-wait" id="lobby-wait">Esperando jugadores…</p>
+    <p class="lobby-expire" id="lobby-expire" style="display:none"></p>
     <ul class="plist" id="lobby-list"></ul>
     <label class="checkline" id="vol-row"><input type="checkbox" id="chk-vol" /> <span>Quiero ser el asesino 🪓</span></label>
     <button class="btn primary" id="btn-start">Empezar partida</button>
     <button class="btn" id="btn-leave">Salir de la sala</button>
     <div class="msg" id="lobby-msg"></div>
   </div>
+  <div id="confirm-leave"><div class="cab-card">
+    <p class="cab-txt">La partida está en curso. ¿Seguro que quieres salir de la sala?</p>
+    <div class="row2"><button class="btn" id="btn-leave-no" type="button">No</button><button class="btn primary" id="btn-leave-yes" type="button">Sí, salir</button></div>
+  </div></div>
 </section>
 
 <!-- FIN DE PARTIDA -->
 <section class="screen hidden" id="scr-end">
   <div class="card">
-    <button class="btn-sala" type="button" data-sala>← Sala de Juegos</button>
     <div class="endtitle" id="end-title">FIN</div>
     <p class="tagline" id="end-sub" style="margin-bottom:0"></p>
     <ul class="endlist" id="end-list"></ul>
@@ -2387,6 +2411,52 @@ let lobbyPlayers=[];                   // anfitrión: [{pid,name,vol}]
 let serverTimer=null, snapTimer=null, inputTimer=null, rafId=null;
 const PEER_PREFIX='pesadillaretro-';
 
+/* ---------- Caducidad de salas en espera ----------
+   Una sala del anfitrión SIN jugadores (nadie se ha unido) se
+   cierra sola a los 10 minutos de espera, con aviso claro. Si se
+   une alguien, si empieza la partida o si el anfitrión vuelve a
+   quedarse solo, el temporizador se ajusta en consecuencia. */
+const ROOM_WAIT_MS=10*60*1000;
+let roomExpireTimer=null, roomExpireTick=null, roomExpireDeadline=0;
+function refreshExpireLabel(){
+  const el=$('#lobby-expire'); if(!el) return;
+  if(!roomExpireDeadline||playing||bgServer||!isHost||lobbyPlayers.length>=2){
+    el.textContent=''; el.style.display='none'; return;
+  }
+  const left=Math.max(0,roomExpireDeadline-Date.now());
+  const m=Math.floor(left/60000), s=Math.floor((left%60000)/1000);
+  el.style.display='block';
+  el.textContent='⏰ Sala sin jugadores: se cerrará sola en '+m+':'+String(s).padStart(2,'0')+' si nadie se une.';
+}
+function clearRoomExpiry(){
+  if(roomExpireTimer){ clearTimeout(roomExpireTimer); roomExpireTimer=null; }
+  if(roomExpireTick){ clearInterval(roomExpireTick); roomExpireTick=null; }
+  roomExpireDeadline=0; refreshExpireLabel();
+}
+function startRoomExpiry(){
+  clearRoomExpiry();
+  if(!isHost||playing||bgServer||lobbyPlayers.length>=2) return;
+  roomExpireDeadline=Date.now()+ROOM_WAIT_MS;
+  roomExpireTimer=setTimeout(expireRoom,ROOM_WAIT_MS);
+  roomExpireTick=setInterval(refreshExpireLabel,1000);
+  refreshExpireLabel();
+}
+function expireRoom(){
+  if(playing||bgServer||!isHost) return;
+  if(lobbyPlayers.length>=2){ clearRoomExpiry(); return; }
+  clearRoomExpiry();
+  cleanupNet(); isHost=false; isSolo=false; currentCode='';
+  setScreen('#scr-menu');
+  const mm=$('#menu-msg');
+  mm.textContent='⏰ La sala caducó: nadie se unió en 10 minutos y se cerró sola. Crea una nueva cuando quieras jugar.';
+  mm.className='msg err';
+}
+/* Al cerrar o abandonar la página, el peer se destruye siempre:
+   así la sala desaparece al instante y no queda fantasma. */
+function destroyPeerOnClose(){ if(peer){ try{ peer.destroy(); }catch(e){} peer=null; } }
+window.addEventListener('pagehide',destroyPeerOnClose);
+window.addEventListener('beforeunload',destroyPeerOnClose);
+
 function broadcastNet(msg){ Object.values(hostConns).forEach(c=>{ if(c&&c.open) c.send(msg); }); }
 function lobbyBroadcast(){
   broadcastNet({t:'lobby', players:lobbyPlayers, mode:gameMode});
@@ -2403,6 +2473,16 @@ function renderLobby(){
   if(isHost){ btn.disabled = list.length<2; btn.textContent = list.length<2? 'Esperando jugadores… ('+list.length+'/3)' : 'Empezar partida'; }
   else { btn.disabled=true; btn.textContent='Esperando a que el anfitrión empiece…'; }
   if(bgServer){ btn.disabled=true; btn.textContent='Partida en curso… (abandonaste, espera a que termine)'; }
+  /* Flujo uniforme de sala: código + copiar + estado de espera */
+  const waitEl=$('#lobby-wait');
+  if(waitEl){
+    waitEl.textContent = bgServer? 'Partida en curso…'
+      : list.length<2? 'Esperando jugadores… ('+list.length+'/3)'
+      : list.length<3? 'Esperando jugadores… ('+list.length+'/3) — ya pueden empezar o esperar al tercero'
+      : '¡Sala llena! (3/3) Listos para empezar';
+  }
+  const copyBtn=$('#btn-copy-code'); if(copyBtn) copyBtn.disabled=!currentCode;
+  refreshExpireLabel();
 }
 let guestLobby=[], currentCode='';
 
@@ -2430,6 +2510,7 @@ function createRoom(){
     lobbyPlayers=[{pid:'p1',name:myName,vol:false}];
     setScreen('#scr-lobby'); renderLobby();
     $('#lobby-msg').textContent='';
+    startRoomExpiry();
   });
   peer.on('error',err=>{
     if(err.type==='unavailable-id'){ cleanupNet(); createRoomRetry(); }
@@ -2442,7 +2523,7 @@ function createRoom(){
 }
 function createRoomRetry(){ currentCode=makeCode();
   peer=new Peer(PEER_PREFIX+currentCode.toLowerCase());
-  peer.on('open',()=>{ lobbyPlayers=[{pid:'p1',name:myName,vol:false}]; setScreen('#scr-lobby'); renderLobby(); });
+  peer.on('open',()=>{ lobbyPlayers=[{pid:'p1',name:myName,vol:false}]; setScreen('#scr-lobby'); renderLobby(); startRoomExpiry(); });
   peer.on('connection',conn=>{ conn.on('data',msg=>hostOnGuestData(conn,msg)); conn.on('close',()=>hostOnGuestLeave(conn)); });
 }
 function hostOnGuestData(conn,msg){
@@ -2456,6 +2537,7 @@ function hostOnGuestData(conn,msg){
     lobbyPlayers.push({pid:realPid,name:String(msg.name||'Jugador').slice(0,14),vol:false});
     conn.send({t:'welcome', pid:realPid, mode:gameMode, code:currentCode});
     lobbyBroadcast();
+    if(lobbyPlayers.length>=2) clearRoomExpiry(); // ya hay jugadores: la sala no caduca
     return;
   }
   const pid=conn._pid; if(!pid) return;
@@ -2471,7 +2553,7 @@ function hostOnGuestLeave(conn){
   const pid=conn._pid; if(!pid) return;
   delete hostConns[pid];
   lobbyPlayers=lobbyPlayers.filter(p=>p.pid!==pid);
-  if(!playing) lobbyBroadcast();
+  if(!playing){ lobbyBroadcast(); if(isHost&&lobbyPlayers.length<2) startRoomExpiry(); }
   else { addFeed('Un jugador se desconectó'); serverAbandon(pid); }
 }
 function joinRoom(){
@@ -2509,6 +2591,7 @@ function guestOnHostData(msg){
   }
 }
 function cleanupNet(){
+  clearRoomExpiry(); hideLeaveConfirm();
   if(peer){ try{ peer.destroy(); }catch(e){} peer=null; }
   hostConn=null; hostConns={}; lobbyPlayers=[]; guestLobby=[];
 }
@@ -2534,6 +2617,7 @@ function startSolo(){
   startGame('solo',[{id:'p1',name:myName,role:'surv'}]);
 }
 function startGame(mode, roster){
+  clearRoomExpiry(); // la sala ya no está en espera: no caduca
   gameMode=mode; rosterCache=roster;
   leftToLobby=false; bgServer=false; hideAbandonConfirm();
   const mine=roster.find(r=>r.id===myId);
@@ -2662,6 +2746,40 @@ function doAbandon(){
   setScreen('#scr-lobby'); renderLobby();
 }
 
+/* ---------- Copiar código de sala ---------- */
+function copyRoomCode(){
+  const code=(currentCode||'').toUpperCase();
+  const msgEl=$('#lobby-msg'); if(!msgEl) return;
+  if(!code){ msgEl.textContent='Todavía no hay código de sala.'; msgEl.className='msg err'; return; }
+  const ok=()=>{ msgEl.textContent='📋 ¡Código copiado: '+code+'! Pásalo a tus amigos.'; msgEl.className='msg'; };
+  const fallback=()=>{
+    const ta=document.createElement('textarea');
+    ta.value=code; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); ok(); }
+    catch(e){ msgEl.textContent='Tu código es '+code+' — cópialo a mano.'; msgEl.className='msg'; }
+    document.body.removeChild(ta);
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(code).then(ok,fallback);
+  } else fallback();
+  sfx.click();
+}
+
+/* ---------- Salir de la sala (con confirmación si hay partida en curso) ---------- */
+function showLeaveConfirm(){ const c=$('#confirm-leave'); if(c) c.style.display='flex'; }
+function hideLeaveConfirm(){ const c=$('#confirm-leave'); if(c) c.style.display='none'; }
+function doLeaveRoom(){
+  hideLeaveConfirm();
+  if(bgServer){ // mi servidor seguía corriendo la partida de los demás: lo apago al salir
+    if(serverTimer) clearInterval(serverTimer);
+    if(snapTimer) clearInterval(snapTimer);
+    serverTimer=snapTimer=null; S=null; bgServer=false;
+  }
+  cleanupNet(); isHost=false; isSolo=false; leftToLobby=false; currentCode='';
+  setScreen('#scr-menu');
+}
+
 /* ---------- Botones de interfaz ---------- */
 let selectedMode='pvp';
 $('#seg-mode').addEventListener('click',e=>{
@@ -2699,7 +2817,13 @@ $('#btn-start').addEventListener('click',()=>{ if(isHost) hostStartGame(); });
 $('#btn-abandon').addEventListener('click',()=>{ if(playing) showAbandonConfirm(); });
 $('#btn-abandon-no').addEventListener('click',hideAbandonConfirm);
 $('#btn-abandon-yes').addEventListener('click',doAbandon);
-$('#btn-leave').addEventListener('click',()=>{ cleanupNet(); isHost=false; setScreen('#scr-menu'); });
+$('#btn-copy-code').addEventListener('click',copyRoomCode);
+$('#btn-leave').addEventListener('click',()=>{
+  if(playing||bgServer) showLeaveConfirm(); // en mitad de una partida: confirmar antes de salir
+  else doLeaveRoom();
+});
+$('#btn-leave-no').addEventListener('click',hideLeaveConfirm);
+$('#btn-leave-yes').addEventListener('click',doLeaveRoom);
 $('#btn-rematch').addEventListener('click',()=>{
   if(isSolo){ startGame('solo',[{id:'p1',name:myName,role:'surv'}]); return; }
   if(isHost){ hostStartGame(); }
@@ -2707,7 +2831,7 @@ $('#btn-rematch').addEventListener('click',()=>{
 $('#btn-tomenu').addEventListener('click',()=>{ stopGameLoops(); cleanupNet(); isHost=false; isSolo=false; S=null; V=null; setScreen('#scr-menu'); });
 /* Regreso a la Sala de Juegos: misma ventana, sin target=_blank
    (bloqueado en el visor de Muse y en los WebView de las apps). */
-document.querySelectorAll('[data-sala]').forEach(b=>b.addEventListener('click',()=>{ window.location.href='https://thedecro3312-ux.github.io/sala-de-juegos/'; }));
+document.querySelectorAll('[data-sala]').forEach(b=>b.addEventListener('click',()=>{ window.location.assign('https://thedecro3312-ux.github.io/sala-de-juegos/'); }));
 document.addEventListener('gesturestart',e=>e.preventDefault());
 document.body.style.touchAction='none';
 setScreen('#scr-menu');
