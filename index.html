@@ -58,6 +58,15 @@
   .btn.primary:hover{ background:#a50d04; }
   .btn:disabled{ opacity:.45; cursor:not-allowed; }
   .btn.small{ width:auto; display:inline-block; padding:.5rem .9rem; font-size:1rem; margin-top:0; }
+  /* Botón de regreso a la Sala de Juegos: esquina superior de cada
+     menú, borde sangre sobre fondo oscuro, bien grande para tocarlo
+     en Android. Navega en la misma ventana (sin target=_blank). */
+  .btn-sala{ display:block; width:100%; margin:0 0 1rem; padding:.85rem 1rem; min-height:3.4rem;
+    background:#1a0505; border:1px solid var(--blood); color:#ffd9d9; font-weight:700;
+    font-size:1.15rem; letter-spacing:.05em; text-align:center; box-shadow:inset 0 0 0 2px #000; }
+  .btn-sala:hover,.btn-sala:active{ background:var(--blood-dark); color:#fff; }
+  #confirm-abandon .btn-sala{ margin:.7rem 0 0; }
+  @media (pointer:coarse){ .btn-sala{ min-height:4rem; font-size:1.25rem; padding:1rem; } }
   .row2{ display:flex; gap:.6rem; } .row2 > *{ flex:1; }
   .seg{ display:flex; border:1px solid var(--line); }
   .seg button{ flex:1; background:#0a0908; color:var(--dim); border:0; font-weight:700; font-size:1.02rem; padding:.7rem .3rem; line-height:1.25; }
@@ -109,6 +118,15 @@
     box-shadow:0 0 18px rgba(229,56,59,.55), inset 0 0 0 2px #000; transition:transform .06s; }
   #wig-bar{ height:100%; width:0%; background:repeating-linear-gradient(45deg,#e5383b 0 14px,#8d0801 14px 28px); transition:width .08s linear; }
   #wiggle-ui .wig-hint{ margin-top:.5rem; font-weight:700; font-size:1.05rem; color:var(--bone); text-shadow:1px 1px 0 #000; }
+  /* Barra de desangrado propia (mientras estás derribado): grande,
+     roja y con la cuenta atrás, imposible de ignorar */
+  #bleed-ui{ position:absolute; left:50%; top:63%; transform:translateX(-50%); width:min(88vw,480px); display:none; text-align:center; }
+  #bleed-ui .bleed-cap{ font-family:'Press Start 2P',monospace; font-size:.85rem; color:#ffd9d9;
+    text-shadow:2px 2px 0 #000; margin-bottom:.55rem; animation:hookpulse .5s infinite alternate; }
+  #bleed-wrap{ height:22px; background:#0a0908; border:2px solid var(--blood);
+    box-shadow:0 0 18px rgba(229,56,59,.55), inset 0 0 0 2px #000; }
+  #bleed-bar{ height:100%; width:100%; background:repeating-linear-gradient(45deg,#e5383b 0 14px,#8d0801 14px 28px); transition:width .2s linear; }
+  #bleed-ui .bleed-hint{ margin-top:.5rem; font-weight:700; font-size:1.05rem; color:var(--bone); text-shadow:1px 1px 0 #000; }
   #feed{ position:absolute; left:.7rem; bottom:.7rem; max-width:min(70vw,340px); font-weight:600; font-size:.98rem; }
   #feed div{ background:rgba(8,6,6,.66); padding:.2rem .55rem; margin-top:.3rem; border-left:3px solid var(--blood-dark); }
   /* Botón Abandonar: esquina superior izquierda del HUD, bajo el
@@ -183,6 +201,7 @@
   <div id="confirm-abandon"><div class="cab-card">
     <p class="cab-txt">¿Seguro que quieres abandonar la partida?</p>
     <div class="row2"><button class="btn" id="btn-abandon-no" type="button">No</button><button class="btn primary" id="btn-abandon-yes" type="button">Sí, abandonar</button></div>
+    <button class="btn-sala" type="button" data-sala>← Sala de Juegos</button>
   </div></div>
   <div id="objective"></div>
   <div id="hookalert"></div>
@@ -190,6 +209,7 @@
   <div id="heart">♥</div>
   <div id="prompt"><span class="txt" id="prompt-txt"></span><div id="prog-wrap"><div id="prog-bar"></div></div></div>
   <div id="wiggle-ui"><div class="wig-cap">😱 ¡FORCEJEA!</div><div id="wig-wrap"><div id="wig-bar"></div></div><div class="wig-hint" id="wig-hint">Alterna A y D lo más rápido que puedas</div></div>
+  <div id="bleed-ui"><div class="bleed-cap">🩸 TE ESTÁS DESANGRANDO</div><div id="bleed-wrap"><div id="bleed-bar"></div></div><div class="bleed-hint" id="bleed-hint"></div></div>
   <div id="skill"><canvas id="skill-cv" width="150" height="150"></canvas><div class="cap">¡ESPACIO!</div></div>
   <div id="feed"></div>
   <div id="lockhint">Haz clic en la pantalla para mirar con el ratón</div>
@@ -209,6 +229,7 @@
 <!-- MENÚ PRINCIPAL -->
 <section class="screen" id="scr-menu">
   <div class="card">
+    <button class="btn-sala" type="button" data-sala>← Sala de Juegos</button>
     <h1 class="title">PESADILLA<br /><span class="red">RETRO</span></h1>
     <p class="subtitle">Terror asimétrico · Estilo Doom clásico</p>
     <p class="tagline">Repara los generadores y escapa… si el asesino te deja. Para 3 jugadores en línea con código de sala, o practica en solitario contra la IA.</p>
@@ -239,14 +260,16 @@
         <li><b>Forcejeo 😱:</b> si el asesino te carga, llena la barra de forcejeo alternando rápido <kbd>A</kbd> y <kbd>D</kbd> (o <kbd>←</kbd> y <kbd>→</kbd>): alternar llena mucho más rápido que machacar una sola tecla. En móvil, toca el botón grande <b>¡FORCEJEA!</b> alternando sus lados. Al llenarla te liberas y el asesino queda aturdido unos segundos.</li>
         <li><b>Reparar:</b> mantén <kbd>E</kbd> junto al generador. En el chequeo de habilidad pulsa <kbd>Espacio</kbd> cuando la aguja esté en la zona amarilla; fallar hace ruido y delata tu posición.</li>
         <li><b>Pallets 🪵:</b> hay pallets de madera en las puertas de las casitas y en los loops del mapa. Si el asesino te persigue de cerca, pulsa <kbd>E</kbd> junto a uno para soltarlo: cae, bloquea el paso y aturde al asesino 2 s si le cae encima. El asesino puede romper un pallet caído manteniendo <kbd>E</kbd> (2–3 s)… y un pallet roto ya no vuelve.</li>
-        <li><b>Curar 💚:</b> si un compañero está herido (aguanta un golpe menos), acércate y mantén <kbd>E</kbd> durante 5 segundos para curarlo y dejarlo sano otra vez. Si te alejas o el asesino te golpea, la curación se corta y se pierde el progreso. Nadie puede curarse a sí mismo, y en Práctica solo no hay compañero que te cure.</li>
+        <li><b>Curar 💚:</b> si un compañero está herido (aguanta un golpe menos), acércate y mantén <kbd>E</kbd> durante 5 segundos para curarlo y dejarlo sano otra vez. Verás cómo te <b>arrodillas junto a él</b> con las manos trabajando sobre su pecho. Si te alejas o el asesino te golpea, la curación se corta y se pierde el progreso. Nadie puede curarse a sí mismo, y en Práctica solo no hay compañero que te cure.</li>
+        <li><b>Reanimar 💚:</b> si un compañero está <b>derribado</b>, mantén <kbd>E</kbd> junto a él unos 4–5 segundos para levantarlo: te arrodillas a su lado y él <b>se va incorporando poco a poco</b> (apoyado en los codos, sentado y de rodillas) hasta ponerse en pie, aunque quedará herido y aguantará un golpe menos. El derribado ve en su pantalla quién lo está levantando y cuánto falta. Si te alejas, sueltas <kbd>E</kbd> o el asesino te golpea, se pierde todo el progreso.</li>
+        <li><b>Desangrado 🩸:</b> como en Dead by Daylight, al caer derribado empiezas a <b>desangrarte</b>: tienes <b>90 segundos</b> antes de morir, con una barra roja sobre tu cuerpo (la ven tus compañeros, con los segundos que te quedan), un charco de sangre que crece bajo ti y tu propia barra de desangrado en pantalla con la cuenta atrás. El temporizador <b>se pausa mientras un compañero te está levantando</b>, y el asesino puede cargarte antes de que se acabe el tiempo.</li>
         <li><b>Señal de gancho 🪝:</b> cuando el asesino cuelga a un compañero, los demás sobrevivientes ven una señal roja pulsante sobre el gancho que se ve a través de las paredes, una flecha en el borde de la pantalla con la distancia y un aviso en el HUD. ¡Vayan por él antes de que sea tarde!</li>
         <li><b>Sin escapatoria:</b> si todos los sobrevivientes vivos están colgados en ganchos a la vez, mueren al instante y el asesino gana la partida.</li>
         <li><b>Un gancho, un sobreviviente 🪝:</b> cada gancho solo puede tener a un sobreviviente colgado a la vez. Si el asesino intenta colgar a otro en un gancho ocupado, no podrá: verá el aviso «Gancho ocupado» y tendrá que llevarlo a otro gancho libre. Al rescatar al colgado (o si muere), el gancho queda libre otra vez.</li>
         <li><b>Abandonar 🚪:</b> con el botón <b>Abandonar</b> de la esquina superior izquierda sales de la partida y vuelves a la sala de espera (antes te pide confirmación, para que no salgas por error). Si abandona un sobreviviente, cuenta como eliminado y la partida sigue para los demás; si abandona el asesino, la partida termina para todos. En Práctica solo, vuelves al menú principal.</li>
         <li><b>El mapa:</b> casitas y cobertizos con dos puertas para dar vueltas y escapar (loops) y cercas bajas, como en Dead by Daylight. Los árboles, barriles, cajas, llantas y troncos son solo decoración: no bloquean el paso y puedes caminar a través de ellos.</li>
         <li><b>El Segador estilo Doom 👹:</b> un demonio pixelado de frente como los del Doom clásico: piel roja musculosa, cuernos de hueso y ojos amarillos que brillan. Camina en 4 poses, alza las garras para golpear, se dobla de dolor cuando un pallet lo aturde y se desploma al morir. En primera persona verás tus manos pixeladas — o la garra con el cuchillo si eres el asesino.</li>
-        <li><b>Animaciones de los GIFs 🎞️:</b> los sobrevivientes usan las animaciones de los GIFs de referencia tal cual: cabeza grande y redonda beige sin cara, cuerpo chibi corto y píxeles planos de colores sólidos, sin contornos ni sombreado. <b>Idle</b> respirando quieto, <b>caminar</b> erguido con su balanceo, <b>correr</b> inclinado hacia adelante con zancada amplia, <b>agachado quieto</b> compacto y <b>caminar agachado</b> de perfil, encorvado y con pasos cortos. Al quedar herido un sobreviviente cojea con sangre en el pecho, y al ser derribado cae tendido en el suelo.</li>
+        <li><b>Animaciones de los GIFs 🎞️:</b> los sobrevivientes usan las animaciones de los GIFs de referencia tal cual: cabeza grande y redonda beige sin cara, cuerpo chibi corto y píxeles planos de colores sólidos, sin contornos ni sombreado. <b>Idle</b> respirando quieto, <b>caminar</b> erguido con su balanceo, <b>correr</b> inclinado hacia adelante con zancada amplia, <b>agachado quieto</b> compacto y <b>caminar agachado</b> de perfil, encorvado y con pasos cortos. Al quedar herido un sobreviviente cojea con sangre en el pecho, y al ser derribado cae tendido en el suelo. Al curar o reanimar, el compañero se arrodilla junto al caído y este se incorpora por fases hasta levantarse.</li>
         <li><b>Cada sobreviviente con su estilo 🎨:</b> los tres comparten la misma animación y silueta de los GIFs, pero cada uno tiene su combinación de colores para reconocerse a distancia: el primero es <b>el original de los GIFs</b> (torso naranja, un brazo verde y el otro azul, una pierna rosa y la otra roja); el segundo lleva <b>torso azul, casquete rojo</b> y piernas verde y amarilla; y el tercero, <b>torso morado, banda amarilla</b> en la cabeza y piernas naranja y cian.</li>
         <li><b>Agacharse 🤫:</b> mantén <kbd>Ctrl</kbd> o pulsa <kbd>C</kbd> para agacharte (en móvil, el botón <b>AGACHARSE</b>). Agachado te mueves más lento, pero eres más silencioso: el asesino IA solo te detecta a mitad de distancia y tu silueta baja se esconde mejor tras las cercas y las casitas. Pulsa <kbd>C</kbd> otra vez (o suelta <kbd>Ctrl</kbd>) para levantarte.</li>
         <li><b>PC:</b> <kbd>W A S D</kbd> moverte · ratón mirar · <kbd>Shift</kbd> correr · <kbd>Ctrl</kbd> o <kbd>C</kbd> agacharte · <kbd>E</kbd> interactuar · clic atacar (asesino).</li>
@@ -275,6 +298,7 @@
 <!-- FIN DE PARTIDA -->
 <section class="screen hidden" id="scr-end">
   <div class="card">
+    <button class="btn-sala" type="button" data-sala>← Sala de Juegos</button>
     <div class="endtitle" id="end-title">FIN</div>
     <p class="tagline" id="end-sub" style="margin-bottom:0"></p>
     <ul class="endlist" id="end-list"></ul>
@@ -538,12 +562,13 @@ function buildSurvFrames(style){
   const pal=style.pal, U=3;
   function spr(rows){
     const h=rows.length, w=Math.max(...rows.map(r=>r.length));
+    let headY=1e9; rows.forEach((row,y)=>{ if(row.indexOf('H')>=0&&y<headY) headY=y; }); // primera fila de la cabeza (el accesorio la sigue en cualquier pose)
     const c=document.createElement('canvas'); c.width=w*U; c.height=h*U;
     const g=c.getContext('2d');
     rows.forEach((row,y)=>{ for(let x=0;x<row.length;x++){
       let col=pal[row[x]]; if(!col) continue;
-      if(row[x]==='H'&&style.acc==='cap'&&y<3) col=style.accColor;   // casquete: sigue la curva de la cabeza
-      if(row[x]==='H'&&style.acc==='band'&&y===3) col=style.accColor; // banda: una fila sobre la cabeza
+      if(row[x]==='H'&&style.acc==='cap'&&y<headY+3) col=style.accColor;   // casquete: sigue la curva de la cabeza
+      if(row[x]==='H'&&style.acc==='band'&&y===headY+3) col=style.accColor; // banda: una fila sobre la cabeza
       g.fillStyle=col; g.fillRect(x*U,y*U,U,U);
     }});
     return c;
@@ -753,24 +778,124 @@ function buildSurvFrames(style){
   ];
   /* Derribado / cadáver: cuerpo tendido de lado, cabeza a la
      izquierda, torso y piernas estiradas con los colores del estilo. */
+  const DOWN_ROWS=[
+    "..........................",
+    "...HHHHHH.................",
+    "..HHHHHHHH................",
+    "..HHHHHHHHTTTTPPPPPrrrr...",
+    "..HHHHHHHTTTTTPPPPPPrrrrr.",
+    "...HHHHHTTTTTpppppppRRRRR.",
+    ".....HHHTTTTpppppppRRRRR..",
+    ".......ggTTTT..bb.........",
+    "..........................",
+  ];
   function lying(corpse){
-    const rows=[
-      "..........................",
-      "...HHHHHH.................",
-      "..HHHHHHHH................",
-      "..HHHHHHHHTTTTPPPPPrrrr...",
-      "..HHHHHHHTTTTTPPPPPPrrrrr.",
-      "...HHHHHTTTTTpppppppRRRRR.",
-      ".....HHHTTTTpppppppRRRRR..",
-      ".......ggTTTT..bb.........",
-      "..........................",
-    ];
-    const c=spr(rows); const g=c.getContext('2d');
+    const c=spr(DOWN_ROWS); const g=c.getContext('2d');
     if(corpse){ g.fillStyle='#5f0d0d'; g.beginPath(); g.ellipse(c.width/2,c.height-3,32,5,0,0,7); g.fill();
       g.fillStyle='#8d1111'; g.beginPath(); g.ellipse(c.width/2-6,c.height-3,20,3.4,0,0,7); g.fill();
       g.fillStyle=pal.O; g.fillRect(Math.round(c.width*.42),Math.round(c.height*.38),9,6); }
     return c;
   }
+  /* Lienzo alto (26×20) anclado al suelo para el derribado: la
+     figura tendida ocupa las filas de abajo y, al ser reanimado, se
+     va incorporando dentro del mismo lienzo sin cambiar de tamaño
+     en pantalla. */
+  function tall(rows){
+    const pad=[]; for(let i=rows.length;i<20;i++) pad.push('');
+    return spr(pad.concat(rows));
+  }
+  const downedTall=tall(DOWN_ROWS);
+  /* Reanimación: el derribado se incorpora poco a poco mientras un
+     compañero lo levanta — apoyado en los codos, sentado y por fin
+     de rodillas, a punto de ponerse en pie. */
+  const RISE_A=[ // apoyado en los codos: el torso se despega del suelo en diagonal
+    "..HHHHHH..................",
+    ".HHHHHHHH.................",
+    ".HHHHHHHH.................",
+    ".HHHHHHHHTTTT.............",
+    "..HHHHHHTTTTTTT...........",
+    "...HHHHTTTTTTTTTT.........",
+    ".....ggTTTTTTTTPPPPP......",
+    "....gggTTTTTTPPPPPPPrrrr..",
+    "....GGG..TTTTpppppppRRRRR.",
+    "......gggg..pppppppRRRRR..",
+  ];
+  const RISE_B=[ // sentado: torso erguido y piernas estiradas sobre el suelo
+    ".....HHHHHH...............",
+    "....HHHHHHHH..............",
+    "....HHHHHHHH..............",
+    "....HHHHHHHH..............",
+    "....HHHHHHHH..............",
+    ".....HHHHHH...............",
+    ".....TTTTTTT..............",
+    "...ggTTTTTTb..............",
+    "..gggTTTTTTbb.............",
+    "..gggTTTTTTbb.............",
+    "...ggTTTTTTb..............",
+    "....WWWWWWWW..............",
+    "....PPPPPPPPPPPPrrrr......",
+    "....PPPPPPPPPPPPPrrrrr....",
+    "....ppppppppppppRRRRR.....",
+  ];
+  const RISE_C=[ // de rodillas: casi en pie, solo falta el último empujón
+    ".......HHHHHH.............",
+    "......HHHHHHHH............",
+    "......HHHHHHHH............",
+    "......HHHHHHHH............",
+    "......HHHHHHHH............",
+    ".......HHHHHH.............",
+    ".......TTTTTT.............",
+    ".....ggTTTTTTb............",
+    "....gggTTTTTTbb...........",
+    "....gggTTTTTTbb...........",
+    ".....ggTTTTTTb............",
+    "......WWWWWW..............",
+    ".....PPPP..rrrr...........",
+    "....PPPPP...rrrr..........",
+    "....PPPP.....rrrr.........",
+    "....ppp.......rrr.........",
+    "...pppp.......rrrr........",
+  ];
+  const riseF=[tall(RISE_A), tall(RISE_B), tall(RISE_C)];
+  /* Curar / reanimar: el que ayuda se ARRODILLA junto al compañero,
+     inclinado sobre él, con las manos beige trabajando sobre su
+     pecho. Dos frames: manos juntas y manos abiertas apretando,
+     con una pequeña bajada del cuerpo entre uno y otro. Lienzo
+     17×35 como el de pie, con la figura baja (de rodillas). */
+  const KNEEL_A=[
+    ".................",".................",".................",".................",".................",
+    ".................",".................",".................",".................",".................",
+    "........HHHH.....",
+    ".......HHHHHH....",
+    "......HHHHHHHH...",
+    "......HHHHHHHH...",
+    "......HHHHHHHH...",
+    "......HHHHHHHH...",
+    ".......HHHHHH....",
+    "........HHHH.....",
+    "......TTTTTTTT...",
+    "....ggTTTTTTTTb..",
+    "...gggTTTTTTTTbb.",
+    "...gggTTTTTTTTbb.",
+    "....ggTTTTTTbb...",
+    ".....ggTTTTbb....",
+    "......gTTTTb.....",
+    "......gHHHHb.....",
+    ".......HHHH......",
+    ".....WWWWWWWW....",
+    "....PPPP..rrrr...",
+    "...PPPPP...rrrr..",
+    "...PPPP.....rrrr.",
+    "...ppp.......rrr.",
+    "..pppp.......rrrr",
+    "..ppp.........rrr",
+    ".................",
+  ];
+  const KNEEL_B=KNEEL_A.slice();
+  KNEEL_B[24]=".....ggTTTTbb....";
+  KNEEL_B[25]="....ggHHHHHHbb...";
+  KNEEL_B[26]="....HHHH..HHHH...";
+  const kneelF=[spr(KNEEL_A), shift(spr(KNEEL_B),0,2)];
   const idleA=compose(TOP,'idle',0,0);
   const idleB=shift(idleA,0,2); // IDLE (GIF): respiración, el cuerpo baja 2 px y vuelve
   const walkF=[compose(TOP,'strideA',1,0), compose(TOP,'pass',0,-0), compose(TOP,'cross',-1,0), compose(TOP,'strideB',0,0)];
@@ -797,8 +922,10 @@ function buildSurvFrames(style){
     limp: walkF.map(f=>blood(f)), // herido: cojea con sangre en el pecho
     work: [workA, workB],
     heal: [workB, workA],
+    kneel: kneelF,   // arrodillado curando/reanimando, manos trabajando
+    rise: riseF,     // el derribado incorporándose mientras lo levantan
     struggle: [struggle(idleA,1), struggle(idleA,-1)],
-    downed: lying(false),
+    downed: downedTall,
     corpse: lying(true),
     pain: [doomTint(hurtIdle,'rgba(255,70,50,.35)'), hurtIdle]
   };
@@ -941,7 +1068,20 @@ function tiltSprite(img,ang){
   g.translate(28,52); g.rotate(ang); g.drawImage(img,-img.width/2,-img.height);
   return c;
 }
-const SPR_PALLET_TILT=[tiltSprite(SPR_PALLET_UP,-.45), tiltSprite(SPR_PALLET_UP,-1.05)];
+const SPR_PALLET_TILT=[tiltSprite(SPR_PALLET_UP,-.45), tiltSprite(SPR_PALLET_UP,.45)];
+/* El pallet soltado queda DIAGONAL, recargado (~34°) como en DBD, en vez de
+   tumbado plano en el suelo. Lienzo de 64×64 para que la tabla inclinada no
+   se recorte por las esquinas; la base queda en y=60 (el suelo). Cada pallet
+   se inclina hacia un lado fijo (según su índice) para que no todos caigan
+   igual. El pallet en pie y el roto no cambian; SPR_PALLET_DOWN (plano) ya
+   no se usa para el estado soltado. */
+function leanSprite(img,ang){
+  const c=document.createElement('canvas'); c.width=64; c.height=64;
+  const g=c.getContext('2d'); g.imageSmoothingEnabled=false;
+  g.translate(32,60); g.rotate(ang); g.drawImage(img,-img.width/2,-img.height);
+  return c;
+}
+const SPR_PALLET_LEAN=[leanSprite(SPR_PALLET_UP,-.6), leanSprite(SPR_PALLET_UP,.6)];
 
 /* ---------- Sprites de decoración del mapa ---------- */
 function decoCanvas(w,h,draw){ const c=document.createElement('canvas'); c.width=w; c.height=h; draw(c.getContext('2d')); return c; }
@@ -1235,8 +1375,11 @@ function serverTick(dt){
   // el colgado queda en su gancho
   P.forEach(p=>{ if(p.state==='hooked'&&p.hookPos){ p.x=p.hookPos.x; p.y=p.hookPos.y;
     p.hookT-=dt; if(p.hookT<=0){ p.state='dead'; srvMsg('☠️ '+p.name+' fue sacrificado en el gancho'); srvEvent('death',{id:p.id}); } } });
-  // desangrado
-  P.forEach(p=>{ if(p.state==='down'){ p.bleedT-=dt;
+  // desangrado: 90 s derribado y muere; se PAUSA mientras un
+  // compañero lo está levantando (como en DBD)
+  P.forEach(p=>{ if(p.state==='down'){
+    const beingRevived=P.some(h=>h._act==='heal'&&h._actRef===p.id);
+    if(!beingRevived) p.bleedT-=dt;
     if(p.bleedT<=0){ p.state='dead'; srvMsg('☠️ '+p.name+' se desangró'); srvEvent('death',{id:p.id}); } } });
 
   /* --- IA del asesino --- */
@@ -1297,10 +1440,13 @@ function serverTick(dt){
           if(hooked._rescueP>=1){ hooked.state='play'; hooked.hp=1; hooked._rescueP=0; hooked.hookPos=null;
             srvMsg('🙌 '+p.name+' rescató a '+hooked.name); srvEvent('rescue',{id:hooked.id}); }
         } else {
-          // levantar a un derribado
+          // levantar a un derribado (reanimación): 4,5 s con E
+          // mantenida; al terminar se levanta HERIDO (hp 1). Si el
+          // que levanta se aleja, suelta E o recibe un golpe, el
+          // progreso se pierde (ver la limpieza más abajo).
           const downed=survPlayers().find(o=>o.state==='down'&&Math.hypot(o.x-p.x,o.y-p.y)<1.7);
-          if(downed){ p._act='heal'; p._actRef=downed.id;
-            downed._healP=(downed._healP||0)+dt/3; p._actP=downed._healP*100;
+          if(downed && S.time>=(p.cureInterrupt||0)){ p._act='heal'; p._actRef=downed.id;
+            downed._healP=(downed._healP||0)+dt/4.5; p._actP=downed._healP*100;
             if(downed._healP>=1){ downed.state='play'; downed.hp=1; downed._healP=0;
               srvMsg('💚 '+p.name+' levantó a '+downed.name); srvEvent('rescue',{id:downed.id}); }
           } else {
@@ -1359,6 +1505,11 @@ function serverTick(dt){
   // el progreso se pierde por completo, como en DBD.
   survPlayers().forEach(t=>{ if(t._cureP>0 && (t.state!=='play' ||
     !P.some(h=>h._act==='cure'&&h._actRef===t.id))) t._cureP=0; });
+  // Reanimación interrumpida: igual, el progreso de levantar a un
+  // derribado se pierde si nadie lo está levantando este tick o si
+  // ya no sigue derribado (lo cargaron o murió).
+  survPlayers().forEach(t=>{ if(t._healP>0 && (t.state!=='down' ||
+    !P.some(h=>h._act==='heal'&&h._actRef===t.id))) t._healP=0; });
 
   /* --- Escape por las puertas --- */
   if(S.gatesOpen){
@@ -1471,6 +1622,7 @@ function serverSnapshot(){
   Object.values(S.players).forEach(p=>{
     players[p.id]={ id:p.id,name:p.name,role:p.role,x:+p.x.toFixed(2),y:+p.y.toFixed(2),a:+p.a.toFixed(2),
       hp:p.hp,state:p.state,hooks:p.hooks,wiggle:Math.round(p.wiggle||0),crouch:!!p.crouch,carriedBy:p.carriedBy,carrying:p.carrying,
+      bleedT: p.state==='down'? Math.ceil(p.bleedT||0):0,
       act:p._act||null, actP:p._actP||0, actRef:(p._actRef===undefined?null:p._actRef), stun:p.stunT>0 };
   });
   return { players, gens:S.gens.map(g=>({x:g.x,y:g.y,p:Math.round(g.p),done:g.done})),
@@ -1627,10 +1779,15 @@ function pickFrame(p, an, now){
   }
   const F=FR_SURV[survIndex(p.id)%FR_SURV.length];
   if(p.state==='dead') return F.corpse;                                                  // cadáver tendido estilo Doom
-  if(p.state==='down') return F.downed;                                                  // derribado: en el suelo, gateando
+  if(p.state==='down'){                                                                  // derribado: tendido… o incorporándose si lo están levantando
+    const healer=Object.values(V.players).find(q=>q.act==='heal'&&q.actRef===p.id);
+    if(healer){ const pr=healer.actP||0; return pr<35? F.rise[0] : pr<70? F.rise[1] : F.rise[2]; }
+    return F.downed;
+  }
   if(p.state==='hooked'||p.state==='carried') return F.struggle[Math.floor(now/170)%2]; // forcejeo
   if(p.act==='repair') return F.work[Math.floor(now/210)%2];                            // manos en el generador
-  if(p.act==='cure'||p.act==='heal'||p.act==='rescue') return F.heal[Math.floor(now/260)%2]; // manos curando/ayudando
+  if(p.act==='cure'||p.act==='heal') return F.kneel[Math.floor(now/200)%2];             // ARRODILLADO junto al compañero, manos trabajando sobre él
+  if(p.act==='rescue') return F.heal[Math.floor(now/260)%2];                            // manos ayudando a bajar del gancho
   if(p.crouch){ // AGACHADO (GIFs "CROUCH IDLE" / "CROUCH WALK" de Decro)
     if(moving) return (p.hp===1? F.crouchHurtWalk : F.crouchWalk)[Math.floor(now/130)%4]; // pasos cortos arrastrados, ~160 ms por frame
     return (p.hp===1? F.crouchHurtIdle : F.crouchIdle)[Math.floor(now/300)%2];            // quieto y compacto, respirando bajo
@@ -1717,10 +1874,12 @@ function render(now){
     const el=now-palletAnim[i].at; // ms desde que cambió de estado: caída animada
     if(pl.st==='up') sprites.push({x:pl.x,y:pl.y,img:SPR_PALLET_UP,h:.85,w:.5,kind:'pallet'});
     else if(pl.st==='down'){
+      // Caída: se inclina hacia su lado fijo y queda recargado en diagonal
+      // (~34°, base en el suelo con drop .26) en vez de tumbado plano.
+      const leanDir=i%2; // 0 = izquierda, 1 = derecha (fijo por pallet)
       if(el<90) sprites.push({x:pl.x,y:pl.y,img:SPR_PALLET_UP,h:.85,w:.5,kind:'pallet'});
-      else if(el<170) sprites.push({x:pl.x,y:pl.y,img:SPR_PALLET_TILT[0],h:.9,w:.8,kind:'pallet',drop:.04});
-      else if(el<250) sprites.push({x:pl.x,y:pl.y,img:SPR_PALLET_TILT[1],h:.8,w:.85,kind:'pallet',drop:.14});
-      else sprites.push({x:pl.x,y:pl.y,img:SPR_PALLET_DOWN,h:.5,w:.72,kind:'pallet',drop:.3});
+      else if(el<170) sprites.push({x:pl.x,y:pl.y,img:SPR_PALLET_TILT[leanDir],h:.9,w:.8,kind:'pallet',drop:.04});
+      else sprites.push({x:pl.x,y:pl.y,img:SPR_PALLET_LEAN[leanDir],h:.85,w:.8,kind:'pallet',drop:.26});
     }
     else sprites.push({x:pl.x,y:pl.y,img:SPR_PALLET_BRK,h:.2,w:.72,kind:'pallet',drop:.42});
   });
@@ -1736,7 +1895,19 @@ function render(now){
     // humano; el derribado/cadáver es un sprite ancho y bajo (tendido).
     let hh = isK? 1.3 : .99, ww = isK? .74 : .56, drop=0;
     if(!isK&&p.state!=='down'&&p.state!=='dead'){ hh=.99*img.height/105; ww=clamp(hh*img.width/Math.max(1,img.height)*1.05,.3,1.05); }
-    if(p.state==='down'){ drop=.4; hh=.42; ww=.92; }
+    if(!isK&&p.crouch&&p.state==='play'){
+      // AGACHADO: debe verse MÁS BAJO Y COMPACTO que de pie, nunca más
+      // grande. Los frames agachados son lienzos más cortos, pero el de
+      // caminar agachado es de PERFIL y salía un 41% más ancho que el de
+      // pie (0,71 frente a 0,50), y ambos quedaban centrados a media
+      // altura (flotando, con los pies por encima del suelo): en
+      // pantalla el personaje parecía crecer al agacharse. Se reduce
+      // la escala total, se acota el ancho al del cuerpo de pie y se
+      // apoyan los pies en el suelo (drop = 1-hh deja la base del
+      // sprite justo en la base de las paredes).
+      hh*=0.82; ww=Math.min(ww*0.82,.52); drop=1-hh;
+    }
+    if(p.state==='down'){ drop=-.11; hh=.93; ww=.92; } // lienzo alto 26×20: tendido se ve bajo (0,42) y al incorporarse llena el lienzo
     if(p.state==='dead'){ drop=.44; hh=.38; ww=.98; }
     if(p.state==='carried'){ drop=-.18; }
     if(p.state==='hooked'){ drop=-.1; }
@@ -1768,6 +1939,28 @@ function render(now){
     const dsh=clamp(tY/13,0,.8);
     if(anyVisible&&dsh>.03){ ctx.fillStyle=`rgba(2,0,0,${dsh})`;
       visCols.forEach(sx=>ctx.fillRect(sx,yStart,1,sprH)); }
+    // Charco de sangre del derribado: crece bajo su cuerpo conforme
+    // se desangra (fracción consumida de sus 90 s), como en DBD.
+    if(sp.p&&sp.p.state==='down'&&anyVisible){
+      const bf=clamp(1-(sp.p.bleedT||0)/90,0,1);
+      const gy=yStart+sprH*.985, pw2=sprW*(.34+.6*bf);
+      ctx.fillStyle='rgba(95,13,13,.8)';
+      ctx.beginPath(); ctx.ellipse(scrX,gy,pw2/2,Math.max(2,sprH*.05),0,0,7); ctx.fill();
+      ctx.fillStyle='rgba(160,18,18,.85)';
+      ctx.beginPath(); ctx.ellipse(scrX-sprW*.05,gy,pw2/3.2,Math.max(1.4,sprH*.032),0,0,7); ctx.fill();
+    }
+    // Barra de desangrado sobre el derribado: la ven los demás
+    // sobrevivientes (y el propio derribado en espectador) para
+    // saber la urgencia; parpadea cuando queda poco tiempo.
+    if(sp.p&&sp.p.state==='down'&&myRole==='surv'&&anyVisible&&tY<14){
+      const frac=clamp((sp.p.bleedT||0)/90,0,1);
+      const bw2=Math.min(66,sprW*.9), bx=scrX-bw2/2, by=yStart-23;
+      ctx.fillStyle='#0a0908'; ctx.fillRect(bx-1,by-1,bw2+2,7);
+      ctx.fillStyle= frac<.25? (Math.floor(now/180)%2? '#ff2a2a':'#7d0d0d') : '#c01616';
+      ctx.fillRect(bx,by,bw2*frac,5);
+      ctx.fillStyle='#ffd9d9'; ctx.font='bold 8px monospace'; ctx.textAlign='center';
+      ctx.fillText('🩸 '+Math.ceil(sp.p.bleedT||0)+'s',scrX,by-3);
+    }
     // barra de progreso del generador
     if(anyVisible&&sp.kind==='gen'&&!sp.done&&sp.p>0&&tY<9){
       const bw=Math.min(70,sprW*.9);
@@ -1896,7 +2089,7 @@ function updateHUD(now){
     const st = p.role==='killer'? ['ASESINO','bad'] :
       p.state==='escaped'? ['ESCAPÓ','out'] : p.state==='dead'? ['MUERTO','out'] :
       p.state==='hooked'? ['EN GANCHO','bad'] : p.state==='carried'? ['CARGADO','bad'] :
-      p.state==='down'? ['DERIBADO','bad'] : p.hp===1? ['HERIDO','hurt'] : ['BIEN','ok'];
+      p.state==='down'? ['DERIBADO 🩸'+Math.ceil(p.bleedT||0)+'s','bad'] : p.hp===1? ['HERIDO','hurt'] : ['BIEN','ok'];
     return p.id+'|'+p.name+'|'+st[0]+'|'+st[1];
   }).join(';');
   if(ps._sig!==sig){ ps._sig=sig;
@@ -1904,7 +2097,7 @@ function updateHUD(now){
       const st = p.role==='killer'? ['ASESINO','bad'] :
         p.state==='escaped'? ['ESCAPÓ','out'] : p.state==='dead'? ['MUERTO','out'] :
         p.state==='hooked'? ['EN GANCHO','bad'] : p.state==='carried'? ['CARGADO','bad'] :
-        p.state==='down'? ['DERIBADO','bad'] : p.hp===1? ['HERIDO','hurt'] : ['BIEN','ok'];
+        p.state==='down'? ['DERIBADO 🩸'+Math.ceil(p.bleedT||0)+'s','bad'] : p.hp===1? ['HERIDO','hurt'] : ['BIEN','ok'];
       return `<div class="pstat">${p.role==='killer'?'🪓':'🧍'} ${escapeHtml(p.name)} <span class="st ${st[1]}">${st[0]}</span></div>`;
     }).join('');
   }
@@ -1912,7 +2105,7 @@ function updateHUD(now){
   const obj=$('#objective');
   obj.textContent = camSpectate? '👁 Estás fuera — observando a tu equipo' :
     myRole==='killer'? (ms.carrying? 'Lleva a tu presa a un gancho 🪝' : '🪓 Caza a los sobrevivientes: derriba, carga y cuelga') :
-    ms.state==='down'? '😵 Estás derribado: pide ayuda o gatea' :
+    ms.state==='down'? '😵 Estás derribado y desangrándote: pide ayuda o gatea' :
     ms.state==='carried'? '😱 ¡El asesino te carga! ¡Libérate!' :
     ms.state==='hooked'? '🪝 ¡Estás en el gancho! Espera el rescate…' :
     V.gatesOpen? '🚪 ¡Las puertas están abiertas! ¡CORRE A LA SALIDA!' :
@@ -1932,7 +2125,9 @@ function updateHUD(now){
   let txt='', prog=-1;
   const E = IS_TOUCH? 'USAR' : 'E';
   const curer=Object.values(V.players).find(p=>p.act==='cure'&&p.actRef===myId);
-  if(curer){ txt='💚 '+curer.name+' te está curando…'; prog=curer.actP; }
+  const reviver=Object.values(V.players).find(p=>p.act==='heal'&&p.actRef===myId);
+  if(reviver){ txt='💚 '+reviver.name+' te está levantando…'; prog=reviver.actP; }
+  else if(curer){ txt='💚 '+curer.name+' te está curando…'; prog=curer.actP; }
   else if(ms.act==='repair'){ txt='⚙ Reparando generador… ¡atento al chequeo!'; prog=ms.actP; }
   else if(ms.act==='rescue'){ txt='🙌 Rescatando…'; prog=ms.actP; }
   else if(ms.act==='heal'){ txt='💚 Levantando…'; prog=ms.actP; }
@@ -1979,6 +2174,16 @@ function updateHUD(now){
     if(wh.textContent!==ht) wh.textContent=ht;
   } else { wui.style.display='none'; lastWiggleSide=null; }
   if(IS_TOUCH) $('#btn-wiggle').style.display = ms.state==='carried'? 'flex':'none';
+  // Barra de desangrado propia: solo mientras estoy derribado.
+  // Muestra los segundos que me quedan antes de morir desangrado.
+  const bui=$('#bleed-ui');
+  if(ms.state==='down'){
+    bui.style.display='block';
+    const bt=ms.bleedT||0;
+    $('#bleed-bar').style.width=clamp(bt/90*100,0,100)+'%';
+    const bh=$('#bleed-hint'), btxt='Te quedan '+Math.ceil(bt)+' s — que un compañero te levante o el asesino te cargue';
+    if(bh.textContent!==btxt) bh.textContent=btxt;
+  } else bui.style.display='none';
   // latido
   const heart=$('#heart');
   if(myRole==='surv'&&ms.state==='play'||myRole==='surv'&&ms.state==='down'){
@@ -2500,6 +2705,9 @@ $('#btn-rematch').addEventListener('click',()=>{
   if(isHost){ hostStartGame(); }
 });
 $('#btn-tomenu').addEventListener('click',()=>{ stopGameLoops(); cleanupNet(); isHost=false; isSolo=false; S=null; V=null; setScreen('#scr-menu'); });
+/* Regreso a la Sala de Juegos: misma ventana, sin target=_blank
+   (bloqueado en el visor de Muse y en los WebView de las apps). */
+document.querySelectorAll('[data-sala]').forEach(b=>b.addEventListener('click',()=>{ window.location.href='https://thedecro3312-ux.github.io/sala-de-juegos/'; }));
 document.addEventListener('gesturestart',e=>e.preventDefault());
 document.body.style.touchAction='none';
 setScreen('#scr-menu');
